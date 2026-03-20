@@ -23,6 +23,7 @@ function loadProgress(levelCount: number): LevelProgress[] {
 }
 import { LEVELS } from './game/levels';
 import { computePath, initialExecState, type PathStep } from './game/engine';
+import { resumeAudio, playMove, playJump, playFruit, playGoal, playMiss } from './game/audio';
 import GameBoard from './components/GameBoard';
 import BlockPalette from './components/BlockPalette';
 import CommandQueue from './components/CommandQueue';
@@ -153,6 +154,7 @@ export default function Home() {
 
   const fruitCountRef = useRef<HTMLSpanElement>(null);
   const prevTotalFruits = useRef(totalFruits);
+  const prevGameFruits = useRef(0);
 
   useEffect(() => {
     if (state.phase !== 'running') return;
@@ -207,7 +209,32 @@ export default function Home() {
     prevTotalFruits.current = totalFruits;
   }, [totalFruits]);
 
-  const handleAdd = useCallback((block: BlockType) => dispatch({ type: 'ADD_COMMAND', block }), []);
+  // ─── 効果音: 移動 / ジャンプ ───
+  useEffect(() => {
+    if (state.phase !== 'running' || state.animStep === 0) return;
+    const cmd = state.commands[state.animStep - 1];
+    if (cmd === 'jump') playJump();
+    else if (cmd) playMove();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.animStep]);
+
+  // ─── 効果音: くだもの取得 ───
+  useEffect(() => {
+    const cur = state.collectedFruits.length;
+    if (cur > prevGameFruits.current) playFruit();
+    prevGameFruits.current = cur;
+  }, [state.collectedFruits.length]);
+
+  // ─── 効果音: ゴール / ミス ───
+  useEffect(() => {
+    if (state.phase === 'goal_reached') playGoal();
+    if (state.phase === 'shaking')      playMiss();
+  }, [state.phase]);
+
+  const handleAdd = useCallback((block: BlockType) => {
+    resumeAudio();
+    dispatch({ type: 'ADD_COMMAND', block });
+  }, []);
   const handleRemove = useCallback((index: number) => dispatch({ type: 'REMOVE_COMMAND', index }), []);
 
   const isRunning = state.phase === 'running' || state.phase === 'goal_reached';
@@ -251,46 +278,76 @@ export default function Home() {
       {/* ════════════════════════════════════════
           Page background — pastel rainbow
       ════════════════════════════════════════ */}
-      <div className="page-root">
-        {/* ── キラキラ浮遊絵文字 背景レイヤー ── */}
-        <div className="float-bg" aria-hidden="true">
+      {/* ── キラキラ浮遊絵文字 背景レイヤー（page-root の外・fixed で最背面） ── */}
+      <div className="float-bg" aria-hidden="true">
           {([
-            { e: '🌸', top: '2%',  left: '5%',  dur: '8s',  delay: '0s',   size: '22px' },
-            { e: '💖', top: '5%',  left: '20%', dur: '10s', delay: '1.2s', size: '18px' },
-            { e: '⭐', top: '3%',  left: '38%', dur: '7s',  delay: '2.5s', size: '26px' },
-            { e: '🦋', top: '7%',  left: '55%', dur: '12s', delay: '0.5s', size: '20px' },
-            { e: '🌈', top: '4%',  left: '72%', dur: '9s',  delay: '3s',   size: '24px' },
-            { e: '🍭', top: '6%',  left: '88%', dur: '11s', delay: '1.8s', size: '18px' },
-            { e: '🦄', top: '18%', left: '2%',  dur: '13s', delay: '0.8s', size: '28px' },
-            { e: '🌟', top: '14%', left: '14%', dur: '9s',  delay: '2s',   size: '20px' },
-            { e: '💎', top: '20%', left: '30%', dur: '7s',  delay: '1s',   size: '16px' },
-            { e: '🌺', top: '16%', left: '46%', dur: '10s', delay: '3.5s', size: '24px' },
-            { e: '🎀', top: '22%', left: '62%', dur: '8s',  delay: '0.3s', size: '18px' },
-            { e: '🍬', top: '18%', left: '78%', dur: '11s', delay: '2.8s', size: '22px' },
-            { e: '👑', top: '12%', left: '93%', dur: '9s',  delay: '1.5s', size: '20px' },
-            { e: '💫', top: '32%', left: '8%',  dur: '7s',  delay: '4s',   size: '24px' },
-            { e: '🍦', top: '38%', left: '24%', dur: '12s', delay: '0.7s', size: '18px' },
-            { e: '🎪', top: '44%', left: '40%', dur: '9s',  delay: '1.3s', size: '26px' },
-            { e: '🌸', top: '36%', left: '56%', dur: '8s',  delay: '3.2s', size: '20px' },
-            { e: '⭐', top: '42%', left: '72%', dur: '10s', delay: '2.2s', size: '22px' },
-            { e: '🍩', top: '34%', left: '88%', dur: '7s',  delay: '0.9s', size: '18px' },
-            { e: '🌼', top: '48%', left: '96%', dur: '11s', delay: '3.8s', size: '24px' },
-            { e: '🦋', top: '55%', left: '4%',  dur: '9s',  delay: '1.6s', size: '20px' },
-            { e: '👑', top: '62%', left: '18%', dur: '8s',  delay: '4.5s', size: '28px' },
-            { e: '🌈', top: '58%', left: '34%', dur: '11s', delay: '0.4s', size: '16px' },
-            { e: '🦄', top: '65%', left: '50%', dur: '7s',  delay: '2.7s', size: '22px' },
-            { e: '🎀', top: '52%', left: '66%', dur: '10s', delay: '1.1s', size: '18px' },
-            { e: '💎', top: '68%', left: '80%', dur: '13s', delay: '3.6s', size: '24px' },
-            { e: '🌺', top: '60%', left: '93%', dur: '8s',  delay: '0.6s', size: '20px' },
-            { e: '🍭', top: '73%', left: '7%',  dur: '10s', delay: '2.4s', size: '26px' },
-            { e: '🌟', top: '80%', left: '23%', dur: '7s',  delay: '1.9s', size: '18px' },
-            { e: '🍬', top: '76%', left: '42%', dur: '9s',  delay: '4.1s', size: '22px' },
-            { e: '💖', top: '88%', left: '58%', dur: '8s',  delay: '0.2s', size: '20px' },
-            { e: '💫', top: '83%', left: '74%', dur: '11s', delay: '3.3s', size: '16px' },
-            { e: '🍦', top: '92%', left: '88%', dur: '7s',  delay: '1.7s', size: '24px' },
-            { e: '🎪', top: '87%', left: '12%', dur: '10s', delay: '2.6s', size: '18px' },
-            { e: '🌼', top: '94%', left: '50%', dur: '9s',  delay: '0.7s', size: '22px' },
-            { e: '🍩', top: '70%', left: '40%', dur: '8s',  delay: '5s',   size: '16px' },
+            /* ── 上段 ── */
+            { e: '🌸', top: '2%',  left: '5%',  dur: '8s',  delay: '0s',   size: '31px' },
+            { e: '💖', top: '5%',  left: '20%', dur: '10s', delay: '1.2s', size: '25px' },
+            { e: '⭐', top: '3%',  left: '38%', dur: '7s',  delay: '2.5s', size: '36px' },
+            { e: '🦋', top: '7%',  left: '55%', dur: '12s', delay: '0.5s', size: '28px' },
+            { e: '🌈', top: '4%',  left: '72%', dur: '9s',  delay: '3s',   size: '34px' },
+            { e: '🍭', top: '6%',  left: '88%', dur: '11s', delay: '1.8s', size: '25px' },
+            /* ── 上段追加 ── */
+            { e: '🎵', top: '9%',  left: '30%', dur: '8s',  delay: '1.0s', size: '31px' },
+            { e: '🌙', top: '11%', left: '47%', dur: '10s', delay: '4.2s', size: '28px' },
+            { e: '🎊', top: '8%',  left: '63%', dur: '7s',  delay: '2.0s', size: '34px' },
+            { e: '🌠', top: '10%', left: '79%', dur: '9s',  delay: '0.4s', size: '28px' },
+            /* ── 中上段 ── */
+            { e: '🦄', top: '18%', left: '2%',  dur: '13s', delay: '0.8s', size: '39px' },
+            { e: '🌟', top: '14%', left: '14%', dur: '9s',  delay: '2s',   size: '28px' },
+            { e: '💎', top: '20%', left: '30%', dur: '7s',  delay: '1s',   size: '22px' },
+            { e: '🌺', top: '16%', left: '46%', dur: '10s', delay: '3.5s', size: '34px' },
+            { e: '🎀', top: '22%', left: '62%', dur: '8s',  delay: '0.3s', size: '25px' },
+            { e: '🍬', top: '18%', left: '78%', dur: '11s', delay: '2.8s', size: '31px' },
+            { e: '👑', top: '12%', left: '93%', dur: '9s',  delay: '1.5s', size: '28px' },
+            /* ── 中上段追加 ── */
+            { e: '🎈', top: '25%', left: '11%', dur: '11s', delay: '3.0s', size: '25px' },
+            { e: '🌻', top: '28%', left: '27%', dur: '8s',  delay: '1.5s', size: '31px' },
+            { e: '🎠', top: '26%', left: '43%', dur: '12s', delay: '4.8s', size: '28px' },
+            { e: '🐝', top: '24%', left: '59%', dur: '9s',  delay: '2.3s', size: '25px' },
+            { e: '🌙', top: '23%', left: '75%', dur: '7s',  delay: '0.6s', size: '34px' },
+            /* ── 中段 ── */
+            { e: '💫', top: '32%', left: '8%',  dur: '7s',  delay: '4s',   size: '34px' },
+            { e: '🍦', top: '38%', left: '24%', dur: '12s', delay: '0.7s', size: '25px' },
+            { e: '🎪', top: '44%', left: '40%', dur: '9s',  delay: '1.3s', size: '36px' },
+            { e: '🌸', top: '36%', left: '56%', dur: '8s',  delay: '3.2s', size: '28px' },
+            { e: '⭐', top: '42%', left: '72%', dur: '10s', delay: '2.2s', size: '31px' },
+            { e: '🍩', top: '34%', left: '88%', dur: '7s',  delay: '0.9s', size: '25px' },
+            { e: '🌼', top: '48%', left: '96%', dur: '11s', delay: '3.8s', size: '34px' },
+            /* ── 中段追加 ── */
+            { e: '🐠', top: '40%', left: '16%', dur: '8s',  delay: '1.2s', size: '25px' },
+            { e: '🎈', top: '45%', left: '32%', dur: '11s', delay: '5.2s', size: '28px' },
+            { e: '🌻', top: '48%', left: '48%', dur: '9s',  delay: '2.8s', size: '31px' },
+            { e: '🎊', top: '43%', left: '64%', dur: '7s',  delay: '0.8s', size: '34px' },
+            { e: '🐝', top: '46%', left: '84%', dur: '12s', delay: '4.0s', size: '25px' },
+            /* ── 中下段 ── */
+            { e: '🦋', top: '55%', left: '4%',  dur: '9s',  delay: '1.6s', size: '28px' },
+            { e: '👑', top: '62%', left: '18%', dur: '8s',  delay: '4.5s', size: '39px' },
+            { e: '🌈', top: '58%', left: '34%', dur: '11s', delay: '0.4s', size: '22px' },
+            { e: '🦄', top: '65%', left: '50%', dur: '7s',  delay: '2.7s', size: '31px' },
+            { e: '🎀', top: '52%', left: '66%', dur: '10s', delay: '1.1s', size: '25px' },
+            { e: '💎', top: '68%', left: '80%', dur: '13s', delay: '3.6s', size: '34px' },
+            { e: '🌺', top: '60%', left: '93%', dur: '8s',  delay: '0.6s', size: '28px' },
+            /* ── 中下段追加 ── */
+            { e: '🎵', top: '56%', left: '25%', dur: '9s',  delay: '3.4s', size: '31px' },
+            { e: '🌠', top: '63%', left: '41%', dur: '8s',  delay: '1.8s', size: '28px' },
+            { e: '🐠', top: '67%', left: '57%', dur: '10s', delay: '5.0s', size: '25px' },
+            /* ── 下段 ── */
+            { e: '🍭', top: '73%', left: '7%',  dur: '10s', delay: '2.4s', size: '36px' },
+            { e: '🌟', top: '80%', left: '23%', dur: '7s',  delay: '1.9s', size: '25px' },
+            { e: '🍬', top: '76%', left: '42%', dur: '9s',  delay: '4.1s', size: '31px' },
+            { e: '💖', top: '88%', left: '58%', dur: '8s',  delay: '0.2s', size: '28px' },
+            { e: '💫', top: '83%', left: '74%', dur: '11s', delay: '3.3s', size: '22px' },
+            { e: '🍦', top: '92%', left: '88%', dur: '7s',  delay: '1.7s', size: '34px' },
+            { e: '🎪', top: '87%', left: '12%', dur: '10s', delay: '2.6s', size: '25px' },
+            { e: '🌼', top: '94%', left: '50%', dur: '9s',  delay: '0.7s', size: '31px' },
+            { e: '🍩', top: '70%', left: '40%', dur: '8s',  delay: '5s',   size: '22px' },
+            /* ── 下段追加 ── */
+            { e: '🎠', top: '75%', left: '55%', dur: '11s', delay: '2.1s', size: '28px' },
+            { e: '🌸', top: '90%', left: '32%', dur: '9s',  delay: '4.6s', size: '31px' },
+            { e: '🎈', top: '82%', left: '68%', dur: '8s',  delay: '1.3s', size: '25px' },
+            { e: '🌻', top: '96%', left: '18%', dur: '10s', delay: '3.7s', size: '28px' },
           ] as const).map((item, i) => (
             <span
               key={i}
@@ -306,8 +363,9 @@ export default function Home() {
               {item.e}
             </span>
           ))}
-        </div>
+      </div>
 
+      <div className="page-root">
         {/* ── Header ── */}
         <header className="game-header">
           {/* Title + star counter */}
