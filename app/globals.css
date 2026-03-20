@@ -327,29 +327,6 @@ button:focus-visible {
     height: calc((100vw - 48px) / 5) !important;
   }
 
-  /* ── ブロックパレット: 2列グリッド ── */
-  .block-palette {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  .block-palette .block-btn {
-    width: auto !important;
-    height: 64px !important;
-    padding: 4px 6px !important;
-    border-radius: 14px !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 3px !important;
-    font-size: 13px !important;
-  }
-
-  .block-palette .block-btn-jump {
-    grid-column: auto;
-    flex-direction: column !important;
-    gap: 3px !important;
-    height: 64px !important;
-  }
+  /* ブロックパレットはコンポーネント側で常時グリッド制御 */
 }
 
