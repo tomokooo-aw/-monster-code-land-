@@ -1,5 +1,5 @@
 export const FUWA_COLORS = {
-  orange: { body: '#FB923C', inner: '#FED7AA', label: 'オレンジ' },
+  orange: { body: '#FF8B6B', inner: '#FFD0C0', label: 'オレンジ' },
   pink:   { body: '#FF5FA0', inner: '#FBCFE8', label: 'ピンク'   },
   teal:   { body: '#3ECFB2', inner: '#A7F3D0', label: 'ティール' },
   purple: { body: '#A78BFA', inner: '#DDD6FE', label: 'むらさき' },
@@ -18,46 +18,81 @@ export default function FuwaMon({ colorKey, size = 60 }: Props) {
 
   return (
     <svg
-      viewBox="0 0 44 44"
+      viewBox="0 0 64 64"
       width={size}
       height={size}
-      style={{ display: 'block', filter: 'drop-shadow(1px 2px 0px rgba(45,27,78,0.35))' }}
+      style={{ display: 'block', filter: 'drop-shadow(1px 2px 2px rgba(45,27,78,0.3))' }}
     >
-      {/* ─ Ears (drawn first so head overlaps base) ─ */}
-      <ellipse cx={12} cy={9} rx={6} ry={8} fill={body} stroke="#2D1B4E" strokeWidth={2.2} />
-      <ellipse cx={32} cy={9} rx={6} ry={8} fill={body} stroke="#2D1B4E" strokeWidth={2.2} />
-      {/* Ear inner */}
-      <ellipse cx={12} cy={10} rx={3.2} ry={4.8} fill={inner} />
-      <ellipse cx={32} cy={10} rx={3.2} ry={4.8} fill={inner} />
+      <defs>
+        {/* 耳の虹グラデーション（ピンク→水色→黄色） */}
+        <linearGradient id="fuwaEarGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor="#FF9EC0" />
+          <stop offset="50%"  stopColor="#87CEEB" />
+          <stop offset="100%" stopColor="#FFD94A" />
+        </linearGradient>
+        {/* ボディのふわふわ光沢 */}
+        <radialGradient id="fuwaBodyShine" cx="38%" cy="28%" r="55%">
+          <stop offset="0%"   stopColor="white" stopOpacity="0.38" />
+          <stop offset="100%" stopColor="white" stopOpacity="0"    />
+        </radialGradient>
+      </defs>
 
-      {/* ─ Body blob ─ */}
-      <ellipse cx={22} cy={30} rx={14} ry={11} fill={body} stroke="#2D1B4E" strokeWidth={2.2} />
-      {/* Head */}
-      <circle cx={22} cy={19} r={15} fill={body} stroke="#2D1B4E" strokeWidth={2.2} />
+      {/* ─── 左ふわふわ耳 ─── */}
+      <circle cx="9"  cy="14" r="5.5" fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      <circle cx="14" cy="10" r="5.2" fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      <circle cx="7"  cy="9"  r="5"   fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      <circle cx="12" cy="6"  r="4.5" fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      {/* 左耳インナー（虹） */}
+      <circle cx="9"  cy="14" r="3.0" fill="url(#fuwaEarGrad)" />
+      <circle cx="14" cy="10" r="2.8" fill="url(#fuwaEarGrad)" />
+      <circle cx="7"  cy="9"  r="2.8" fill="url(#fuwaEarGrad)" />
+      <circle cx="12" cy="6"  r="2.5" fill="url(#fuwaEarGrad)" />
 
-      {/* Belly patch */}
-      <ellipse cx={22} cy={32} rx={7} ry={5.5} fill={inner} opacity={0.75} />
+      {/* ─── 右ふわふわ耳 ─── */}
+      <circle cx="55" cy="14" r="5.5" fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      <circle cx="50" cy="10" r="5.2" fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      <circle cx="57" cy="9"  r="5"   fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      <circle cx="52" cy="6"  r="4.5" fill={body} stroke="#2D1B4E" strokeWidth="1.8" />
+      {/* 右耳インナー（虹） */}
+      <circle cx="55" cy="14" r="3.0" fill="url(#fuwaEarGrad)" />
+      <circle cx="50" cy="10" r="2.8" fill="url(#fuwaEarGrad)" />
+      <circle cx="57" cy="9"  r="2.8" fill="url(#fuwaEarGrad)" />
+      <circle cx="52" cy="6"  r="2.5" fill="url(#fuwaEarGrad)" />
 
-      {/* ─ Eyes ─ */}
-      <circle cx={15} cy={18} r={6} fill="white" stroke="#2D1B4E" strokeWidth={1.6} />
-      <circle cx={29} cy={18} r={6} fill="white" stroke="#2D1B4E" strokeWidth={1.6} />
-      {/* Pupils */}
-      <circle cx={16.5} cy={19} r={3.4} fill="#2D1B4E" />
-      <circle cx={30.5} cy={19} r={3.4} fill="#2D1B4E" />
-      {/* Eye sparkles */}
-      <circle cx={18.5} cy={17} r={1.3} fill="white" />
-      <circle cx={32.5} cy={17} r={1.3} fill="white" />
+      {/* ─── ボディ ─── */}
+      <ellipse cx="32" cy="53" rx="16" ry="11" fill={body} stroke="#2D1B4E" strokeWidth="2" />
+      {/* ─── 頭（ふっくら丸） ─── */}
+      <circle cx="32" cy="26" r="19" fill={body} stroke="#2D1B4E" strokeWidth="2" />
+      {/* 光沢ハイライト */}
+      <circle cx="32" cy="26" r="19" fill="url(#fuwaBodyShine)" />
 
-      {/* ─ Blush ─ */}
-      <ellipse cx={8}  cy={24} rx={4.5} ry={3} fill="#FF9CAE" opacity={0.6} />
-      <ellipse cx={36} cy={24} rx={4.5} ry={3} fill="#FF9CAE" opacity={0.6} />
+      {/* ─── お腹（薄ピンクの丸模様） ─── */}
+      <ellipse cx="32" cy="54" rx="10.5" ry="7.5" fill={inner} opacity="0.92" />
 
-      {/* ─ Smile ─ */}
+      {/* ─── 目（大きめ・ぬいぐるみ風） ─── */}
+      {/* 白目 */}
+      <circle cx="22.5" cy="24" r="7.5" fill="white" stroke="#2D1B4E" strokeWidth="1.5" />
+      <circle cx="41.5" cy="24" r="7.5" fill="white" stroke="#2D1B4E" strokeWidth="1.5" />
+      {/* 黒目 */}
+      <circle cx="24"   cy="25" r="4.8" fill="#1A1A2E" />
+      <circle cx="43"   cy="25" r="4.8" fill="#1A1A2E" />
+      {/* メインハイライト */}
+      <circle cx="26.5" cy="22.5" r="2"   fill="white" />
+      <circle cx="45.5" cy="22.5" r="2"   fill="white" />
+      {/* サブハイライト */}
+      <circle cx="22.5" cy="27"   r="1.1" fill="white" opacity="0.65" />
+      <circle cx="41.5" cy="27"   r="1.1" fill="white" opacity="0.65" />
+
+      {/* ─── ほっぺ ─── */}
+      <ellipse cx="11" cy="33" rx="6"   ry="3.5" fill="#FF9CAE" opacity="0.55" />
+      <ellipse cx="53" cy="33" rx="6"   ry="3.5" fill="#FF9CAE" opacity="0.55" />
+
+      {/* ─── にっこり笑顔 ─── */}
       <path
-        d="M 14 26 Q 22 34 30 26"
+        d="M 21 35 Q 32 46 43 35"
         fill="none"
         stroke="#2D1B4E"
-        strokeWidth={2.2}
+        strokeWidth="2.4"
         strokeLinecap="round"
       />
     </svg>

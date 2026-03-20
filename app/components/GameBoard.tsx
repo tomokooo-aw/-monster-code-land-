@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, type RefObject } from 'react';
 import type { CellType, Level, Position } from '../game/types';
+import FuwaMon, { type FuwaColorKey } from './FuwaMon';
 
 const CELL_BASE = 72;
 const GAP  = 3; // px gap between cells
@@ -12,6 +13,7 @@ interface Props {
   isShaking: boolean;
   isJumping: boolean;
   jumpKey: number;
+  colorKey: FuwaColorKey;
   goalRef?: RefObject<HTMLDivElement | null>;
 }
 
@@ -51,7 +53,7 @@ const CELL_BG: Record<CellType, string> = {
   fruit_grape:      'linear-gradient(145deg, #FFF5FB 0%, #FFDDF0 100%)',
 };
 
-export default function GameBoard({ level, playerPos, collectedFruits, isRunning, isShaking, isJumping, jumpKey, goalRef }: Props) {
+export default function GameBoard({ level, playerPos, collectedFruits, isRunning, isShaking, isJumping, jumpKey, colorKey, goalRef }: Props) {
   const { grid } = level;
   const boardOuterRef = useRef<HTMLDivElement>(null);
   const [cellPx, setCellPx] = useState(CELL_BASE);
@@ -183,8 +185,7 @@ export default function GameBoard({ level, playerPos, collectedFruits, isRunning
             position: 'relative',
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/fuwa-mon.png" alt="フワモン" style={{ width: imgSize, height: imgSize, objectFit: 'contain' }} />
+          <FuwaMon colorKey={colorKey} size={imgSize} />
 
           {/* 着地ほこりエフェクト（左） */}
           {isJumping && (

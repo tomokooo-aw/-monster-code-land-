@@ -447,6 +447,7 @@ export default function Home() {
               isShaking={isShaking}
               isJumping={isJumping}
               jumpKey={state.animStep}
+              colorKey={playerColor}
               goalRef={goalRef}
             />
 
