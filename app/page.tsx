@@ -147,6 +147,7 @@ export default function Home() {
   const goalRef = useRef<HTMLDivElement>(null);
   const [burstOrigin, setBurstOrigin] = useState<{ x: number; y: number } | null>(null);
   const [progress, setProgress] = useState<LevelProgress[]>(() => loadProgress(LEVELS.length));
+
   // フックより前に計算（useRef の初期値に使うため）
   const totalFruits = progress.reduce((sum, p) => sum + p.fruits, 0);
 
@@ -308,16 +309,7 @@ export default function Home() {
         </div>
 
         {/* ── Header ── */}
-        <header
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 10,
-            marginBottom: 18,
-          }}
-        >
+        <header className="game-header">
           {/* Title + star counter */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <h1
@@ -380,14 +372,14 @@ export default function Home() {
           </div>
 
           {/* Right controls */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, alignItems: 'flex-end' }}>
+          <div className="header-right">
             {/* Level buttons: row1 1-5, row2 6-10 */}
-            <div style={{ display: 'flex', gap: 5 }}>
+            <div className="level-btn-row">
               {topRow.map((lv, i) => (
                 <LevelBtn key={i} index={i} current={state.levelIndex} label={String(i + 1)} onSelect={(idx) => dispatch({ type: 'SET_LEVEL', index: idx })} />
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 5 }}>
+            <div className="level-btn-row">
               {bottomRow.map((lv, i) => (
                 <LevelBtn key={i + 5} index={i + 5} current={state.levelIndex} label={String(i + 6)} onSelect={(idx) => dispatch({ type: 'SET_LEVEL', index: idx })} />
               ))}
@@ -585,6 +577,7 @@ export default function Home() {
 
             {/* Stars hint */}
             <div
+              className="stars-hint"
               style={{
                 padding: '10px 12px',
                 background: '#FFF0F8',

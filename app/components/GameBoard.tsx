@@ -1,4 +1,4 @@
-import { useRef, useEffect, type RefObject } from 'react';
+import { useRef, useEffect, useState, type RefObject } from 'react';
 import type { CellType, Level, Position } from '../game/types';
 
 const CELL_BASE = 72;
@@ -11,7 +11,6 @@ interface Props {
   isRunning: boolean;
   isShaking: boolean;
   isJumping: boolean;
-  cellSize?: number;
   jumpKey: number;
   goalRef?: RefObject<HTMLDivElement | null>;
 }
@@ -52,12 +51,24 @@ const CELL_BG: Record<CellType, string> = {
   fruit_grape:      'linear-gradient(145deg, #FFF5FB 0%, #FFDDF0 100%)',
 };
 
-export default function GameBoard({ level, playerPos, collectedFruits, isRunning, isShaking, isJumping, jumpKey, goalRef, cellSize = CELL_BASE }: Props) {
+export default function GameBoard({ level, playerPos, collectedFruits, isRunning, isShaking, isJumping, jumpKey, goalRef }: Props) {
   const { grid } = level;
-  const CELL = cellSize;
+  const boardOuterRef = useRef<HTMLDivElement>(null);
+  const [cellPx, setCellPx] = useState(CELL_BASE);
+  const CELL = cellPx;
   const CELL_SIZE = CELL - GAP * 2;
   const imgSize = Math.min(54, CELL - 14);
   const jumpRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!boardOuterRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      if (w > 0) setCellPx(Math.floor(w / 5));
+    });
+    ro.observe(boardOuterRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   // Web Animations API でジャンプアニメーションを確実に再生
   useEffect(() => {
@@ -79,23 +90,24 @@ export default function GameBoard({ level, playerPos, collectedFruits, isRunning
   return (
     // 外側コンテナ: overflow: visible でジャンプアニメーションをクリップしない
     <div
+      ref={boardOuterRef}
+      className="board-outer grid-container"
       style={{
         position: 'relative',
-        width: 5 * CELL,
-        height: 4 * CELL,
+        height: 4 * CELL + 12,
+        paddingBottom: 12,
         border: '4px solid #2D1B4E',
         borderRadius: 18,
         boxShadow: '0 8px 32px rgba(194,24,91,0.18), 6px 6px 0 #2D1B4E',
-        flexShrink: 0,
       }}
     >
-      {/* グリッドセル専用レイヤー: overflow:hidden でセルを角丸にクリップ */}
+      {/* グリッドセル専用レイヤー */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           borderRadius: 14,
-          overflow: 'hidden',
+          overflow: 'visible',
           background: '#FFB3D1',
         }}
       >
@@ -109,7 +121,7 @@ export default function GameBoard({ level, playerPos, collectedFruits, isRunning
               <div
                 key={key}
                 ref={isGoal ? goalRef : undefined}
-                className={isStart ? 'start-cell-glow' : isGoal ? 'goal-cell-glow' : undefined}
+                className={`grid-cell${isStart ? ' start-cell-glow' : isGoal ? ' goal-cell-glow' : ''}`}
                 style={{
                   position: 'absolute',
                   left: c * CELL + GAP,

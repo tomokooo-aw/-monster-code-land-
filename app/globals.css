@@ -157,7 +157,7 @@ button:focus-visible {
   animation: goalGlow 1.6s ease-in-out infinite;
 }
 
-/* ── Responsive layout ── */
+/* ── Layout ── */
 .page-root {
   position: relative;
   z-index: 1;
@@ -166,6 +166,29 @@ button:focus-visible {
   padding: 14px 16px 48px;
 }
 
+/* ── Header ── */
+.game-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.level-btn-row {
+  display: flex;
+  gap: 5px;
+}
+
+/* ── Game area ── */
 .game-area {
   display: flex;
   gap: 18px;
@@ -203,5 +226,130 @@ button:focus-visible {
 .run-reset-row {
   display: flex;
   gap: 12px;
+}
+
+/* ── Block palette buttons（デフォルト: 縦1列） ── */
+.block-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* デフォルトでボタンが横幅いっぱいに伸びるよう align-items: stretch を保証 */
+.block-palette .block-btn {
+  width: 100%;
+}
+
+/* ── Board outer container ── */
+/* width = 5cols × 72px + border 4px×2 = 368px */
+.board-outer {
+  width: 368px;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════
+   Tablet: 600px〜899px
+════════════════════════════════════════ */
+@media (min-width: 600px) and (max-width: 899px) {
+  .page-root {
+    padding: 10px 12px 32px;
+  }
+}
+
+/* ════════════════════════════════════════
+   スマホ: 430px以下
+════════════════════════════════════════ */
+@media (max-width: 430px) {
+  .page-root {
+    padding: 10px 12px 32px;
+  }
+
+  /* ヘッダー: 縦並び */
+  .game-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-right {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  /* レベルボタン: 横スクロール */
+  .level-btn-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    width: 100%;
+    padding-bottom: 2px;
+  }
+
+  /* ゲームエリア: 縦並び */
+  .game-area {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .game-left-col {
+    width: 100%;
+    align-items: center;
+  }
+
+  .game-right-col {
+    width: 100%;
+    min-width: unset;
+    box-sizing: border-box;
+  }
+
+  .cmd-count-row {
+    width: 100%;
+  }
+
+  .run-reset-row {
+    width: 100%;
+  }
+
+  /* ヒント欄はモバイルで非表示（縦幅を節約） */
+  .stars-hint {
+    display: none;
+  }
+
+  /* ── グリッド ── */
+  .grid-container {
+    width: calc(100vw - 24px) !important;
+    margin: 0 auto !important;
+  }
+
+  .grid-cell {
+    width: calc((100vw - 48px) / 5) !important;
+    height: calc((100vw - 48px) / 5) !important;
+  }
+
+  /* ── ブロックパレット: 2列グリッド ── */
+  .block-palette {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .block-palette .block-btn {
+    width: auto !important;
+    height: 64px !important;
+    padding: 4px 6px !important;
+    border-radius: 14px !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 3px !important;
+    font-size: 13px !important;
+  }
+
+  .block-palette .block-btn-jump {
+    grid-column: auto;
+    flex-direction: column !important;
+    gap: 3px !important;
+    height: 64px !important;
+  }
 }
 

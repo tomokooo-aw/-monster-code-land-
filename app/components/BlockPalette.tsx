@@ -30,12 +30,14 @@ export default function BlockPalette({ onAdd, disabled }: Props) {
       >
         ブロック
       </h2>
+      <div className="block-palette">
       {BLOCKS.map(([type, info]) => (
         <button
           key={type}
           onClick={() => onAdd(type)}
           disabled={disabled}
           aria-label={info.label}
+          className={type === 'jump' ? 'block-btn block-btn-jump' : 'block-btn'}
           style={{
             background: info.color,
             border: '3px solid #2D1B4E',
@@ -52,7 +54,6 @@ export default function BlockPalette({ onAdd, disabled }: Props) {
             opacity: disabled ? 0.5 : 1,
             transition: 'transform 0.08s, box-shadow 0.08s',
             userSelect: 'none',
-            width: '100%',
           }}
           onPointerDown={(e) => {
             if (!disabled) {
@@ -73,6 +74,7 @@ export default function BlockPalette({ onAdd, disabled }: Props) {
           <span>{info.label}</span>
         </button>
       ))}
+      </div>
     </div>
   );
 }
